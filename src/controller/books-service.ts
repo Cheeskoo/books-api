@@ -18,10 +18,10 @@ export async function searchBook(bookId: number){
 }
 
 export async function deleteBook(bookId: number){
-    const deleteBook = await prisma.user.delete({
+    const book = await prisma.books.delete({
         where: {
             id: bookId
         }
     })
-    return deleteBook
+    return book
 }

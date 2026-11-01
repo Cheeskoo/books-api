@@ -1,6 +1,6 @@
 import {createBook, searchBook, deleteBook} from './books-service'
 import { Request, Response } from 'express'
-import type{Prisma} from '../generated/prisma/client'
+import {Prisma} from '../generated/prisma/client'
 import type{CreateBookInput} from '../utils/books-schema'
 import {bookIdSchema} from '../utils/books-schema'
 import formatIssues from '../utils/formatIssues'
@@ -45,8 +45,18 @@ export async function deleteBookById(req: Request<{id: string}>, res: Response){
             res.status(400).json({error: {
                 message: `Validation failed`, details: formatIssues(result.error.issues)
             }})
+            return
         }
-     
+    const book = await deleteBook(result.data)
+    res.status(200).json({data: book})
+} catch(error){
+    if(error instanceof Prisma.PrismaClientKnownRequestError){
+        if(error.code === "P2025"){
+            res.status(404).json({error: {message: `The id of the book doesnt exist, check your ID`}})
+            return
+        }
     }
-
+    console.error(error)
+    res.status(500).json({error: {message: `Server unavailable, please try again`}})
+}
 }
